@@ -2,6 +2,7 @@ package com.productdashboard.product_dashboard.service;
 
 import com.productdashboard.product_dashboard.ProductClient;
 import com.productdashboard.product_dashboard.model.Product;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class ProductDashboardService {
     //Base URL
     //private final static String BASE_URL="http://product-service/api/v1/products/";
 
+    @CircuitBreaker(name="product-service",fallbackMethod = "reliable")
     public ResponseEntity<List<Product>> getAllProducts() {
 
         //Calling Rest Template
@@ -55,4 +57,11 @@ public class ProductDashboardService {
         }
         return new ResponseEntity<>(product,HttpStatus.OK);
     }
+
+
+    public ResponseEntity<List<Product>> reliable(Throwable t) {
+        return new ResponseEntity<>(List.of(new Product(101,"Dummy Product",10,99.9,"6 month warrenty")), HttpStatus.OK);
+    }
+
+
 }
